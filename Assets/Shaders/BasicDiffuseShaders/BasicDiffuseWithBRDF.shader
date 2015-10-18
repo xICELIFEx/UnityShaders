@@ -1,11 +1,11 @@
-﻿Shader "CookbookShaders/BasicDiffuse/BasicDiffuseWithRampTexture"
+﻿Shader "CookbookShaders/BasicDiffuse/BasicDiffuseWithBRDF"
 {
 	Properties 
 	{
 		_EmissiveColor	("Emissive Color", Color)			= (1,1,1,1)
 		_AmbientColor	("Ambient Color", Color)			= (1,1,1,1)
 		_MySliderValue	("This is a Slider", Range(0,10))	= 2.5
-		_RampTex		("Ramp Texture", 2D)				= "white" {}
+		_BRDFTex		("BRDF Texture", 2D)				= "white" {}
 	}
 	SubShader 
 	{
@@ -13,18 +13,19 @@
 		LOD 200
 		
 		CGPROGRAM
-		#pragma surface surf BasicDiffuseWithRampTexture
+		#pragma surface surf BasicDiffuseWithBRDF
 
 		float4 _EmissiveColor;
 		float4 _AmbientColor;
 		float _MySliderValue;
-		sampler2D _RampTex;
+		sampler2D _BRDFTex;
 
-		inline float4 LightingBasicDiffuseWithRampTexture(SurfaceOutput s, fixed3 lightDir, fixed atten)
+		inline float4 LightingBasicDiffuseWithBRDF(SurfaceOutput s, fixed3 lightDir, half3 viewDir, fixed atten)
 		{
 			float difLight = dot(s.Normal, lightDir);
+			float rimLight = dot(s.Normal, viewDir);
 			float hLambert = difLight * 0.5 + 0.5;
-			float3 ramp = tex2D(_RampTex, float2(hLambert, 0)).rgb;
+			float3 ramp = tex2D(_BRDFTex, float2(hLambert, rimLight)).rgb;
 
 			float4 col;
 			col.rgb = s.Albedo * _LightColor0.rgb * (ramp);
